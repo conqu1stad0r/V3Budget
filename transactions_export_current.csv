@@ -1,0 +1,8 @@
+id,date,amount,description,category,account,transaction_type
+7,2025-01-19,3000.00,Salary deposit,Income,Checking Account,income
+8,2025-01-18,-45.00,Internet bill,Utilities,Checking Account,expense
+1,2025-01-15,-45.67,Grocery shopping at Whole Foods,Food & Dining,Checking Account,expense
+2,2025-01-14,-25.00,Gas station fill-up,Transportation,Credit Card,expense
+3,2025-01-13,2500.00,Monthly salary deposit,Income,Checking Account,income
+4,2025-01-12,-120.50,Electric bill payment,Utilities,Checking Account,expense
+5,2025-01-11,-89.99,Online subscription service,Entertainment,Credit Card,expense
