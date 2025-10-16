@@ -26,69 +26,210 @@ const generateMonthOptions = () => {
   };
 
 const PersonalFinanceApp = () => {
-  // Authentication state
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Authentication state - check localStorage on initial load
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const saved = localStorage.getItem('isAuthenticated');
+    return saved === 'true';
+  });
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
 
-  // Update sample transactions to use current dates with more variety
+  // Update sample transactions to use current dates with much more variety
   const [transactions, setTransactions] = useState(() => {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
 
-    const currentMonthStr = String(currentMonth).padStart(2, '0');
-    const prevMonthStr = String(currentMonth - 1 || 12).padStart(2, '0');
-    const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+    const transactions = [];
+    let id = 1;
 
-    return [
-      // Current month transactions - more variety
-      { id: 1, accountType: 'Checking', date: `${currentYear}-${currentMonthStr}-01`, name: 'Starbucks Coffee', amount: -5.95, category: 'Food' },
-      { id: 2, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-02`, name: 'Netflix Subscription', amount: -15.99, category: 'Entertainment' },
-      { id: 3, accountType: 'Checking', date: `${currentYear}-${currentMonthStr}-03`, name: 'Paycheck Deposit', amount: 2500.00, category: 'Income' },
-      { id: 4, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-04`, name: 'Shell Gas Station', amount: -42.30, category: 'Transportation' },
-      { id: 5, accountType: 'Checking', date: `${currentYear}-${currentMonthStr}-05`, name: 'Whole Foods Market', amount: -125.67, category: 'Food' },
-      { id: 6, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-06`, name: 'Amazon Purchase', amount: -78.99, category: 'Shopping' },
-      { id: 7, accountType: 'Checking', date: `${currentYear}-${currentMonthStr}-07`, name: 'Electric Bill', amount: -89.45, category: 'Utilities' },
-      { id: 8, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-08`, name: 'Chipotle Mexican Grill', amount: -14.85, category: 'Food' },
-      { id: 9, accountType: 'Savings', date: `${currentYear}-${currentMonthStr}-09`, name: 'Interest Payment', amount: 12.50, category: 'Income' },
-      { id: 10, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-10`, name: 'AMC Theater', amount: -24.50, category: 'Entertainment' },
-      { id: 16, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-11`, name: 'Uber Ride', amount: -18.45, category: 'Transportation' },
-      { id: 17, accountType: 'Checking', date: `${currentYear}-${currentMonthStr}-12`, name: 'Water Bill', amount: -45.20, category: 'Utilities' },
-      { id: 18, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-13`, name: 'Target Shopping', amount: -92.33, category: 'Shopping' },
-      { id: 19, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-14`, name: 'CVS Pharmacy', amount: -34.67, category: 'Healthcare' },
-      { id: 20, accountType: 'Checking', date: `${currentYear}-${currentMonthStr}-15`, name: 'Trader Joes', amount: -87.42, category: 'Food' },
-      { id: 21, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-16`, name: 'Spotify Premium', amount: -9.99, category: 'Entertainment' },
-      { id: 22, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-17`, name: 'Chevron Gas', amount: -55.20, category: 'Transportation' },
-      { id: 23, accountType: 'Checking', date: `${currentYear}-${currentMonthStr}-18`, name: 'Mortgage Payment', amount: -1850.00, category: 'Mortgage' },
-      { id: 24, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-19`, name: 'Best Buy Electronics', amount: -245.99, category: 'Shopping' },
-      { id: 25, accountType: 'Checking', date: `${currentYear}-${currentMonthStr}-20`, name: 'Internet Bill', amount: -79.99, category: 'Utilities' },
-      { id: 26, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-21`, name: 'Panera Bread', amount: -12.45, category: 'Food' },
-      { id: 27, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-22`, name: 'Hulu Subscription', amount: -7.99, category: 'Entertainment' },
-      { id: 28, accountType: 'Checking', date: `${currentYear}-${currentMonthStr}-23`, name: 'Costco Groceries', amount: -156.89, category: 'Food' },
-      { id: 29, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-24`, name: 'Walgreens', amount: -28.75, category: 'Healthcare' },
-      { id: 30, accountType: 'Credit Card', date: `${currentYear}-${currentMonthStr}-25`, name: 'Lyft Ride', amount: -22.30, category: 'Transportation' },
+    // Generate transactions for the last 6 months
+    for (let monthOffset = 5; monthOffset >= 0; monthOffset--) {
+      const date = new Date(currentYear, currentMonth - 1 - monthOffset, 1);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const monthStr = String(month).padStart(2, '0');
+      const daysInMonth = new Date(year, month, 0).getDate();
 
-      // Previous month transactions - more variety
-      { id: 11, accountType: 'Checking', date: `${prevYear}-${prevMonthStr}-05`, name: 'Dunkin Donuts', amount: -6.25, category: 'Food' },
-      { id: 12, accountType: 'Credit Card', date: `${prevYear}-${prevMonthStr}-08`, name: '76 Gas Station', amount: -38.90, category: 'Transportation' },
-      { id: 13, accountType: 'Checking', date: `${prevYear}-${prevMonthStr}-10`, name: 'Safeway Groceries', amount: -98.45, category: 'Food' },
-      { id: 14, accountType: 'Credit Card', date: `${prevYear}-${prevMonthStr}-12`, name: 'Nike Store', amount: -156.78, category: 'Shopping' },
-      { id: 15, accountType: 'Checking', date: `${prevYear}-${prevMonthStr}-15`, name: 'Salary Deposit', amount: 2500.00, category: 'Income' },
-      { id: 31, accountType: 'Credit Card', date: `${prevYear}-${prevMonthStr}-17`, name: 'Gas Company Bill', amount: -68.50, category: 'Utilities' },
-      { id: 32, accountType: 'Checking', date: `${prevYear}-${prevMonthStr}-18`, name: 'Mortgage Payment', amount: -1850.00, category: 'Mortgage' },
-      { id: 33, accountType: 'Credit Card', date: `${prevYear}-${prevMonthStr}-20`, name: 'Doctors Visit', amount: -75.00, category: 'Healthcare' },
-      { id: 34, accountType: 'Credit Card', date: `${prevYear}-${prevMonthStr}-22`, name: 'Home Depot', amount: -134.56, category: 'Shopping' },
-      { id: 35, accountType: 'Checking', date: `${prevYear}-${prevMonthStr}-25`, name: 'Kroger Groceries', amount: -112.30, category: 'Food' }
-    ];
+      // Income transactions (beginning of month)
+      transactions.push(
+        { id: id++, accountType: 'Checking', date: `${year}-${monthStr}-01`, name: 'Salary Deposit', amount: 2500.00, category: 'Income' },
+        { id: id++, accountType: 'Checking', date: `${year}-${monthStr}-15`, name: 'Salary Deposit', amount: 2500.00, category: 'Income' },
+        { id: id++, accountType: 'Savings', date: `${year}-${monthStr}-${String(daysInMonth).padStart(2, '0')}`, name: 'Interest Payment', amount: 12.50 + Math.random() * 5, category: 'Income' }
+      );
+
+      // Mortgage (fixed, beginning of month)
+      transactions.push(
+        { id: id++, accountType: 'Checking', date: `${year}-${monthStr}-01`, name: 'Mortgage Payment', amount: -1850.00, category: 'Mortgage' }
+      );
+
+      // Utilities (semi-random amounts)
+      transactions.push(
+        { id: id++, accountType: 'Checking', date: `${year}-${monthStr}-05`, name: 'Electric Bill', amount: -(75 + Math.random() * 40), category: 'Utilities' },
+        { id: id++, accountType: 'Checking', date: `${year}-${monthStr}-07`, name: 'Water Bill', amount: -(35 + Math.random() * 20), category: 'Utilities' },
+        { id: id++, accountType: 'Checking', date: `${year}-${monthStr}-10`, name: 'Gas Company Bill', amount: -(45 + Math.random() * 50), category: 'Utilities' },
+        { id: id++, accountType: 'Credit Card', date: `${year}-${monthStr}-12`, name: 'Internet & Cable', amount: -(85 + Math.random() * 25), category: 'Utilities' },
+        { id: id++, accountType: 'Credit Card', date: `${year}-${monthStr}-15`, name: 'Phone Bill', amount: -(55 + Math.random() * 20), category: 'Utilities' }
+      );
+
+      // Food - lots of variety throughout the month
+      const foodTransactions = [
+        { name: 'Whole Foods', min: 80, max: 150 },
+        { name: 'Trader Joes', min: 60, max: 120 },
+        { name: 'Costco Groceries', min: 120, max: 200 },
+        { name: 'Safeway', min: 50, max: 100 },
+        { name: 'Starbucks Coffee', min: 5, max: 12 },
+        { name: 'Chipotle', min: 12, max: 25 },
+        { name: 'Panera Bread', min: 10, max: 20 },
+        { name: 'Local Restaurant', min: 35, max: 85 },
+        { name: 'Pizza Delivery', min: 25, max: 45 },
+        { name: 'Sushi Restaurant', min: 40, max: 90 },
+        { name: 'Fast Food', min: 8, max: 15 },
+        { name: 'Deli Lunch', min: 10, max: 18 }
+      ];
+
+      // Add 12-18 food transactions per month
+      const numFoodTransactions = 12 + Math.floor(Math.random() * 7);
+      for (let i = 0; i < numFoodTransactions; i++) {
+        const foodItem = foodTransactions[Math.floor(Math.random() * foodTransactions.length)];
+        const day = 1 + Math.floor(Math.random() * daysInMonth);
+        transactions.push({
+          id: id++,
+          accountType: Math.random() > 0.5 ? 'Credit Card' : 'Checking',
+          date: `${year}-${monthStr}-${String(day).padStart(2, '0')}`,
+          name: foodItem.name,
+          amount: -(foodItem.min + Math.random() * (foodItem.max - foodItem.min)),
+          category: 'Food'
+        });
+      }
+
+      // Transportation
+      const numGasTransactions = 3 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < numGasTransactions; i++) {
+        const day = 2 + Math.floor(Math.random() * (daysInMonth - 2));
+        const gasStations = ['Shell', 'Chevron', '76 Gas', 'Arco', 'BP'];
+        transactions.push({
+          id: id++,
+          accountType: 'Credit Card',
+          date: `${year}-${monthStr}-${String(day).padStart(2, '0')}`,
+          name: gasStations[Math.floor(Math.random() * gasStations.length)],
+          amount: -(35 + Math.random() * 30),
+          category: 'Transportation'
+        });
+      }
+
+      // Ride shares
+      const numRides = Math.floor(Math.random() * 5);
+      for (let i = 0; i < numRides; i++) {
+        const day = 1 + Math.floor(Math.random() * daysInMonth);
+        transactions.push({
+          id: id++,
+          accountType: 'Credit Card',
+          date: `${year}-${monthStr}-${String(day).padStart(2, '0')}`,
+          name: Math.random() > 0.5 ? 'Uber Ride' : 'Lyft Ride',
+          amount: -(12 + Math.random() * 25),
+          category: 'Transportation'
+        });
+      }
+
+      // Entertainment
+      const entertainmentItems = [
+        { name: 'Netflix Subscription', amount: -15.99 },
+        { name: 'Spotify Premium', amount: -9.99 },
+        { name: 'Hulu Subscription', amount: -7.99 },
+        { name: 'Disney+ Subscription', amount: -10.99 },
+        { name: 'AMC Theater', min: 20, max: 50 },
+        { name: 'Concert Tickets', min: 45, max: 150 },
+        { name: 'Video Game Purchase', min: 30, max: 70 },
+        { name: 'Bowling Alley', min: 25, max: 60 },
+        { name: 'Mini Golf', min: 15, max: 35 }
+      ];
+
+      // Subscriptions
+      transactions.push(
+        { id: id++, accountType: 'Credit Card', date: `${year}-${monthStr}-01`, name: 'Netflix Subscription', amount: -15.99, category: 'Entertainment' },
+        { id: id++, accountType: 'Credit Card', date: `${year}-${monthStr}-01`, name: 'Spotify Premium', amount: -9.99, category: 'Entertainment' }
+      );
+
+      // Random entertainment
+      const numEntertainment = 1 + Math.floor(Math.random() * 4);
+      for (let i = 0; i < numEntertainment; i++) {
+        const item = entertainmentItems[4 + Math.floor(Math.random() * (entertainmentItems.length - 4))];
+        const day = 1 + Math.floor(Math.random() * daysInMonth);
+        transactions.push({
+          id: id++,
+          accountType: 'Credit Card',
+          date: `${year}-${monthStr}-${String(day).padStart(2, '0')}`,
+          name: item.name,
+          amount: item.amount || -(item.min + Math.random() * (item.max - item.min)),
+          category: 'Entertainment'
+        });
+      }
+
+      // Shopping
+      const shoppingItems = [
+        { name: 'Amazon Purchase', min: 25, max: 150 },
+        { name: 'Target Shopping', min: 40, max: 120 },
+        { name: 'Best Buy Electronics', min: 80, max: 400 },
+        { name: 'Nike Store', min: 60, max: 180 },
+        { name: 'Home Depot', min: 35, max: 200 },
+        { name: 'Macys Department Store', min: 50, max: 150 },
+        { name: 'IKEA Furniture', min: 100, max: 500 },
+        { name: 'Office Supplies', min: 20, max: 80 }
+      ];
+
+      const numShopping = 2 + Math.floor(Math.random() * 5);
+      for (let i = 0; i < numShopping; i++) {
+        const item = shoppingItems[Math.floor(Math.random() * shoppingItems.length)];
+        const day = 1 + Math.floor(Math.random() * daysInMonth);
+        transactions.push({
+          id: id++,
+          accountType: 'Credit Card',
+          date: `${year}-${monthStr}-${String(day).padStart(2, '0')}`,
+          name: item.name,
+          amount: -(item.min + Math.random() * (item.max - item.min)),
+          category: 'Shopping'
+        });
+      }
+
+      // Healthcare
+      const healthcareItems = [
+        { name: 'CVS Pharmacy', min: 15, max: 60 },
+        { name: 'Walgreens', min: 12, max: 55 },
+        { name: 'Doctors Visit', min: 40, max: 150 },
+        { name: 'Dental Checkup', min: 80, max: 200 },
+        { name: 'Prescription Refill', min: 10, max: 40 },
+        { name: 'Urgent Care', min: 100, max: 250 }
+      ];
+
+      const numHealthcare = 1 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < numHealthcare; i++) {
+        const item = healthcareItems[Math.floor(Math.random() * healthcareItems.length)];
+        const day = 1 + Math.floor(Math.random() * daysInMonth);
+        transactions.push({
+          id: id++,
+          accountType: Math.random() > 0.6 ? 'Credit Card' : 'Checking',
+          date: `${year}-${monthStr}-${String(day).padStart(2, '0')}`,
+          name: item.name,
+          amount: -(item.min + Math.random() * (item.max - item.min)),
+          category: 'Healthcare'
+        });
+      }
+    }
+
+    // Sort transactions by date (newest first)
+    return transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
   });
   const [budgets, setBudgets] = useState({}); // Will store as: {'2024-08': {Food: 50, Entertainment: 100}, '2024-07': {...}}
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
-  const [activeTab, setActiveTab] = useState('transactions');
+  const [activeTab, setActiveTab] = useState(() => {
+    const saved = localStorage.getItem('activeTab');
+    return saved || 'transactions';
+  });
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -103,6 +244,7 @@ const PersonalFinanceApp = () => {
   const [analyticsDateFrom, setAnalyticsDateFrom] = useState('');
   const [analyticsDateTo, setAnalyticsDateTo] = useState('');
   const [analyticsViewType, setAnalyticsViewType] = useState('monthly'); // 'monthly', 'weekly', 'daily'
+  const [analyticsCategoryFilter, setAnalyticsCategoryFilter] = useState('All'); // 'All' or specific category name
 
   // Budget management states
   const [rolloverEnabled, setRolloverEnabled] = useState({});
@@ -751,6 +893,11 @@ const PersonalFinanceApp = () => {
     }
   }, [budgets]);
 
+  // Persist activeTab to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('activeTab', activeTab);
+  }, [activeTab]);
+
   // Auto-copy budgets from previous month when switching to new month
   const autoFillBudgetsFromPreviousMonth = (targetMonth) => {
     // Calculate previous month
@@ -966,13 +1113,26 @@ const PersonalFinanceApp = () => {
         const monthName = current.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
         // Calculate actual spending/income for this month
-        const monthTransactions = getTransactionsByMonth(monthKey);
+        let monthTransactions = getTransactionsByMonth(monthKey);
+
+        // Apply category filter if not 'All'
+        if (analyticsCategoryFilter !== 'All') {
+          monthTransactions = monthTransactions.filter(t => t.category === analyticsCategoryFilter);
+        }
+
         const monthTotal = monthTransactions.reduce((sum, t) => sum + t.amount, 0);
         runningBalance += monthTotal;
 
         // Calculate predicted spending/income based on budgets
         const monthBudgets = budgets[monthKey] || {};
-        const budgetTotal = Object.values(monthBudgets).reduce((sum, amount) => sum - amount, 0); // Negative because budgets are expenses
+
+        // Filter budgets by category if not 'All'
+        let budgetTotal;
+        if (analyticsCategoryFilter !== 'All') {
+          budgetTotal = -(monthBudgets[analyticsCategoryFilter] || 0); // Negative because budgets are expenses
+        } else {
+          budgetTotal = Object.values(monthBudgets).reduce((sum, amount) => sum - amount, 0); // Negative because budgets are expenses
+        }
 
         // Add estimated income (assume same as previous month's income or average income)
         const incomeTransactions = monthTransactions.filter(t => t.category === 'Income');
@@ -1013,7 +1173,7 @@ const PersonalFinanceApp = () => {
         const weekLabel = `${current.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 
         // Calculate actual balance change for this week
-        const weekTransactions = transactions.filter(t => {
+        let weekTransactions = transactions.filter(t => {
           try {
             const transDate = new Date(t.date);
             return transDate >= current && transDate <= weekEnd;
@@ -1022,6 +1182,11 @@ const PersonalFinanceApp = () => {
           }
         });
 
+        // Apply category filter if not 'All'
+        if (analyticsCategoryFilter !== 'All') {
+          weekTransactions = weekTransactions.filter(t => t.category === analyticsCategoryFilter);
+        }
+
         const weekTotal = weekTransactions.reduce((sum, t) => sum + t.amount, 0);
         runningBalance += weekTotal;
 
@@ -1029,7 +1194,15 @@ const PersonalFinanceApp = () => {
         const daysInWeek = 7;
         const currentMonthKey = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}`;
         const monthBudgets = budgets[currentMonthKey] || {};
-        const totalMonthlyBudget = Object.values(monthBudgets).reduce((sum, amount) => sum + amount, 0);
+
+        // Filter budgets by category if not 'All'
+        let totalMonthlyBudget;
+        if (analyticsCategoryFilter !== 'All') {
+          totalMonthlyBudget = monthBudgets[analyticsCategoryFilter] || 0;
+        } else {
+          totalMonthlyBudget = Object.values(monthBudgets).reduce((sum, amount) => sum + amount, 0);
+        }
+
         const estimatedWeeklySpending = -(totalMonthlyBudget / 30) * daysInWeek; // Negative for expenses
 
         // Estimate weekly income
@@ -1055,7 +1228,7 @@ const PersonalFinanceApp = () => {
         const dayLabel = current.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
         // Calculate actual balance change for this day
-        const dayTransactions = transactions.filter(t => {
+        let dayTransactions = transactions.filter(t => {
           try {
             const transDate = new Date(t.date);
             return transDate.toDateString() === current.toDateString();
@@ -1064,13 +1237,26 @@ const PersonalFinanceApp = () => {
           }
         });
 
+        // Apply category filter if not 'All'
+        if (analyticsCategoryFilter !== 'All') {
+          dayTransactions = dayTransactions.filter(t => t.category === analyticsCategoryFilter);
+        }
+
         const dayTotal = dayTransactions.reduce((sum, t) => sum + t.amount, 0);
         runningBalance += dayTotal;
 
         // For daily predicted: estimate based on daily budget average
         const currentMonthKey = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}`;
         const monthBudgets = budgets[currentMonthKey] || {};
-        const totalMonthlyBudget = Object.values(monthBudgets).reduce((sum, amount) => sum + amount, 0);
+
+        // Filter budgets by category if not 'All'
+        let totalMonthlyBudget;
+        if (analyticsCategoryFilter !== 'All') {
+          totalMonthlyBudget = monthBudgets[analyticsCategoryFilter] || 0;
+        } else {
+          totalMonthlyBudget = Object.values(monthBudgets).reduce((sum, amount) => sum + amount, 0);
+        }
+
         const estimatedDailySpending = -(totalMonthlyBudget / 30); // Negative for expenses
 
         // Estimate daily income
@@ -1160,6 +1346,7 @@ const PersonalFinanceApp = () => {
     // Check credentials
     if (username === 'etuckett' && password === 'ubfaKi3v') {
       setIsAuthenticated(true);
+      localStorage.setItem('isAuthenticated', 'true');
       setUsername('');
       setPassword('');
     } else {
@@ -1271,6 +1458,22 @@ const PersonalFinanceApp = () => {
               Personal Finance Tracker
             </h1>
             <p className="mt-2 opacity-90">Track expenses, set budgets, and visualize your spending patterns</p>
+          </div>
+
+          {/* Sample Data Disclaimer */}
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-yellow-700">
+                  <strong className="font-semibold">Demo Version - Sample Data Only:</strong> This application is pre-populated with sample/demo transactions for demonstration purposes. Do not enter any real personal or financial information. All data shown is fictional and for testing purposes only.
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Navigation */}
@@ -2065,7 +2268,7 @@ const PersonalFinanceApp = () => {
                   </div>
 
                   {/* Custom Date Range */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         From Date
@@ -2102,12 +2305,28 @@ const PersonalFinanceApp = () => {
                         <option value="monthly">Monthly</option>
                       </select>
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Category Filter
+                      </label>
+                      <select
+                        value={analyticsCategoryFilter}
+                        onChange={(e) => setAnalyticsCategoryFilter(e.target.value)}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="All">All Categories</option>
+                        {categories.filter(cat => cat !== 'Income').map(category => (
+                          <option key={category} value={category}>{category}</option>
+                        ))}
+                      </select>
+                    </div>
                     <div className="flex items-end">
                       <button
                         onClick={() => {
                           setAnalyticsDateFrom('');
                           setAnalyticsDateTo('');
                           setAnalyticsViewType('monthly');
+                          setAnalyticsCategoryFilter('All');
                         }}
                         className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
@@ -2120,6 +2339,11 @@ const PersonalFinanceApp = () => {
                 <div className="bg-white border rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
                     Predicted vs Actual Spending
+                    {analyticsCategoryFilter !== 'All' && (
+                      <span className="text-sm font-normal text-blue-600 ml-2">
+                        ({analyticsCategoryFilter} only)
+                      </span>
+                    )}
                     {analyticsDateFrom && analyticsDateTo && (
                       <span className="text-sm font-normal text-gray-600 ml-2">
                         ({new Date(analyticsDateFrom).toLocaleDateString()} - {new Date(analyticsDateTo).toLocaleDateString()})
